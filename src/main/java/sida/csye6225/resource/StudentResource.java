@@ -6,7 +6,6 @@ import sida.csye6225.service.StudentService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 import java.util.Map;
 
 @Path("/students")
