@@ -1,5 +1,5 @@
 # csye6225
-URL: <a herf="http://Studentinformationsystem-env-sida.us-east-2.elasticbeanstalk.com"></a><br/> 
+URL: <a herf="http://Studentinformationsystem-env-sida.us-east-2.elasticbeanstalk.com">Studentinformationsystem-env-sida.us-east-2.elasticbeanstalk.com</a><br/> 
 /programs - GET,POST <br/>
 /programs/{programId} - GET,PUT,DELETE <br/> 
 /programs/{programId}/courses - GET <br/> 
