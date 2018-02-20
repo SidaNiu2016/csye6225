@@ -1,4 +1,5 @@
 # csye6225
+URL: Studentinformationsystem-env-sida.us-east-2.elasticbeanstalk.com 
 
 ../programs - GET,POST 
 
