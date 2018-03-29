@@ -1,62 +1,35 @@
 package sida.csye6225.dao;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Lecture {
+import sida.csye6225.database.DynamoDBSetCoverter;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
+
+@DynamoDBTable(tableName = "Lectures")
+public class Lecture extends BasicObject{
+	public String topic;
+	public Set<String> notes;
 	
-	private String lectureId;
-    private String courseId;
-    private String lectureName;
-    private List<String> notes;
-    private List<String> materials;
-    
-    public Lecture() {
-    }
-
-    public Lecture(String lectureId, String courseId, String lectureName) {
-        this.setLectureId(lectureId);
-        this.setCourseId(courseId);
-        this.setLectureName(lectureName);
-    }
-
-	public String getLectureId() {
-		return lectureId;
-	}
-
-	public void setLectureId(String lectureId) {
-		this.lectureId = lectureId;
-	}
-
-	public String getCourseId() {
-		return courseId;
-	}
-
-	public void setCourseId(String courseId) {
-		this.courseId = courseId;
-	}
-
-	public String getLectureName() {
-		return lectureName;
-	}
-
-	public void setLectureName(String lectureName) {
-		this.lectureName = lectureName;
-	}
-
-	public List<String> getNotes() {
-		return notes;
-	}
-
-	public void setNotes(List<String> notes) {
-		this.notes = notes;
-	}
-
-	public List<String> getMaterials() {
-		return materials;
-	}
-
-	public void setMaterials(List<String> materials) {
-		this.materials = materials;
-	}
-    
+	@DynamoDBHashKey(attributeName = "LectureId")
+	public String getId() { return this.id; }
+	public void setId(String id) { this.id = id; }
+	
+	@DynamoDBAttribute(attributeName = "Topic")
+	public String getTopic() { return this.topic; }
+	public void setTopic(String topic) { this.topic = topic; }
+	
+	@DynamoDBAttribute(attributeName = "Notes")
+	@DynamoDBTypeConverted(converter = DynamoDBSetCoverter.class)
+	public Set<String> getNotes() { 
+		if(this.notes == null)
+			this.notes = new HashSet<>();
+		return this.notes;
+	} 
+	
+	public void setNotes(Set<String> notes) { this.notes = notes; }
 }
