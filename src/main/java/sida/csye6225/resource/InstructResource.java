@@ -16,26 +16,26 @@ public class InstructResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getInstructor(@PathParam("courseId") String courseId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Course course = (Course)dynamoDB.get("Courses", courseId);
 		if(course == null)
 			return null;
-		return course.getProfessorId();
+		return course.getProfessor();
 	}
 	
 	@POST
 	@Path("{professorId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String instructCourse(@PathParam("courseId") String courseId
-			, @PathParam("professorId") String professorId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		if(!dynamoDB.contains("Courses", courseId) 
-				|| !dynamoDB.contains("Professors", professorId))
+			, @PathParam("professorId") String proId) {
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		if(!dynamoDB.isContain("Courses", courseId) 
+				|| !dynamoDB.isContain("Professors", proId))
 			return null;
 		
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
-		course.setProfessorId(professorId);
-		dynamoDB.addOrUpdateItem(course);
-		return professorId;
+		Course course = (Course)dynamoDB.get("Courses", courseId);
+		course.setProfessor(proId);
+		dynamoDB.save(course);
+		return proId;
 	} 
 }

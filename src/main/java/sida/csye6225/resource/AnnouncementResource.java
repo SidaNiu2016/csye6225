@@ -22,11 +22,11 @@ public class AnnouncementResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<String> getAnnouncementList(@PathParam("courseId") String courseId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Course course = (Course)dynamoDB.get("Courses", courseId);
 		if(course == null)
 			return null;
-		return course.announcements;
+		return course.announcementSet;
 	}
 	
 	@POST
@@ -34,15 +34,15 @@ public class AnnouncementResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Announcement createAnnouncement(Announcement announcement
 			, @PathParam("courseId") String courseId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		if(dynamoDB.contains("Announcements", announcement.id))
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		if(dynamoDB.isContain("Announcements", announcement.id))
 			return null;
 		
 		announcement.setCourseId(courseId);
-		dynamoDB.addOrUpdateItem(announcement);
-		Course course = (Course) dynamoDB.getItem("Courses", courseId);
-		course.getAnnouncements().add(announcement.id);
-		dynamoDB.addOrUpdateItem(course);
+		dynamoDB.save(announcement);
+		Course course = (Course) dynamoDB.get("Courses", courseId);
+		course.getAnnouncementSet().add(announcement.id);
+		dynamoDB.save(course);
 		return announcement;
 	}
 	
@@ -50,8 +50,8 @@ public class AnnouncementResource {
 	@Path("{announcementId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Announcement getAnnouncement(@PathParam("announcementId") String announcementId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		return (Announcement)dynamoDB.getItem("Announcements", announcementId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		return (Announcement)dynamoDB.get("Announcements", announcementId);
 	} 
 	
 	@PUT
@@ -63,9 +63,9 @@ public class AnnouncementResource {
 			, @PathParam("announcementId") String announcementId) {
 		if(!announcement.id.equals(announcementId))
 			return null;
-		DynamoDB dynamoDB = DynamoDB.getInstance();
+		DynamoDB dynamoDB = DynamoDB.getDB();
 		announcement.setCourseId(courseId);
-		dynamoDB.addOrUpdateItem(announcement);
+		dynamoDB.save(announcement);
 		return announcement;
 	}
 	
@@ -74,10 +74,10 @@ public class AnnouncementResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public void deleteAnnouncement(@PathParam("courseId") String courseId
 			, @PathParam("announcementId") String announcementId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		dynamoDB.deleteItem("Announcements", announcementId);
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
-		course.getAnnouncements().remove(announcementId);
-		dynamoDB.addOrUpdateItem(course);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		dynamoDB.delete("Announcements", announcementId);
+		Course course = (Course)dynamoDB.get("Courses", courseId);
+		course.getAnnouncementSet().remove(announcementId);
+		dynamoDB.save(course);
 	}
 }

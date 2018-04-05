@@ -30,9 +30,9 @@ public class RegisterResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<String> getEnrolledStudents(@PathParam("courseId") String courseId){
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
-		return course.getStudents();
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Course course = (Course)dynamoDB.get("Courses", courseId);
+		return course.getStudentSet();
 	} 
 	
 	@POST
@@ -41,37 +41,36 @@ public class RegisterResource {
 	public Set<String> enrollCourse(String text
 			, @PathParam("courseId") String courseId
 			, @PathParam("studentId") String studentId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
-		Student student = (Student)dynamoDB.getItem("Students", studentId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Course course = (Course)dynamoDB.get("Courses", courseId);
+		Student student = (Student)dynamoDB.get("Students", studentId);
 		if(course == null || student == null)
 			return null;
-		course.getStudents().add(studentId);
-		dynamoDB.addOrUpdateItem(course);
+		course.getStudentSet().add(studentId);
+		dynamoDB.save(course);
 		// Subscribe SNS Topic
 		subscribeTopic(courseId, student.getEmail());
-		return course.getStudents();
+		return course.getStudentSet();
 	} 
 	
 	@DELETE
 	@Path("{studentId}")
 	public void dropCourse(@PathParam("courseId") String courseId
 			, @PathParam("studentId") String studentId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Course course = (Course)dynamoDB.getItem("Courses", courseId);
-		if(course == null || !dynamoDB.contains("Students", studentId))
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Course course = (Course)dynamoDB.get("Courses", courseId);
+		if(course == null || !dynamoDB.isContain("Students", studentId))
 			return;
-		Student student = (Student)dynamoDB.getItem("Students", studentId);
-		course.getStudents().remove(studentId);
-		dynamoDB.addOrUpdateItem(course);
-		// Unsubscribe SNS Topic
+		Student student = (Student)dynamoDB.get("Students", studentId);
+		course.getStudentSet().remove(studentId);
+		dynamoDB.save(course);
 		unsubscribeTopic(courseId, student.getEmail());
 	} 
 	
 	public void subscribeTopic(String courseId, String email) {
 		AmazonSNS SNS_CLIENT = AmazonSNSClientBuilder.standard()
 				.withRegion(Regions.US_WEST_2).build();
-		String arn = "arn:aws:sns:us-west-2:806121996369:" + courseId;
+		String arn = "arn:aws:sns:us-west-2:616733119568:" + courseId;
 		SubscribeRequest subscribeRequest = new SubscribeRequest(arn, "email", email);
 		SNS_CLIENT.subscribe(subscribeRequest);
 	} 
@@ -79,7 +78,7 @@ public class RegisterResource {
 	public void unsubscribeTopic(String courseId, String email) {
 		AmazonSNS SNS_CLIENT = AmazonSNSClientBuilder.standard()
 				.withRegion(Regions.US_WEST_2).build();
-		String arn = "arn:aws:sns:us-west-2:806121996369:" + courseId;
+		String arn = "arn:aws:sns:us-west-2:616733119568:" + courseId;
 		ListSubscriptionsByTopicRequest lRequest = new ListSubscriptionsByTopicRequest(arn);
 		ListSubscriptionsByTopicResult lResult = SNS_CLIENT.listSubscriptionsByTopic(lRequest);
 		List<Subscription> subscriptions = lResult.getSubscriptions();

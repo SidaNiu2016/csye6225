@@ -23,25 +23,25 @@ public class NoteResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<String> getNotes(@PathParam("lectureId") String lectureId){
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Lecture lecture = (Lecture)dynamoDB.get("Lectures", lectureId);
 		if(lecture == null)
 			return null;
-		return lecture.notes;
+		return lecture.noteSet;
 	} 
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Note createNote(Note note, @PathParam("lectureId") String lectureId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
-		if(dynamoDB.contains("Notes", note.id) || lecture == null)
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Lecture lecture = (Lecture)dynamoDB.get("Lectures", lectureId);
+		if(dynamoDB.isContain("Notes", note.id) || lecture == null)
 			return null;
 		
-		dynamoDB.addOrUpdateItem(note);
-		lecture.getNotes().add(note.id);
-		dynamoDB.addOrUpdateItem(lecture);
+		dynamoDB.save(note);
+		lecture.getNoteSet().add(note.id);
+		dynamoDB.save(lecture);
 		return note;
 	}
 	
@@ -49,8 +49,8 @@ public class NoteResource {
 	@Path("{noteId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Note getNote(@PathParam("noteId") String noteId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		return (Note)dynamoDB.getItem("Notes", noteId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		return (Note)dynamoDB.get("Notes", noteId);
 	}
 	
 	@PUT
@@ -59,13 +59,13 @@ public class NoteResource {
 	public Note updateNote(Note note
 			, @PathParam("lectureId") String lectureId
 			, @PathParam("noteId") String noteId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Lecture lecture = (Lecture)dynamoDB.get("Lectures", lectureId);
 		if(lecture == null)
 			return null;
-		lecture.getNotes().add(note.id);
-		dynamoDB.addOrUpdateItem(lecture);
-		dynamoDB.addOrUpdateItem(note);
+		lecture.getNoteSet().add(note.id);
+		dynamoDB.save(lecture);
+		dynamoDB.save(note);
 		return note;
 	}
 	
@@ -73,12 +73,12 @@ public class NoteResource {
 	@Path("{noteId}")
 	public void deleteNote(@PathParam("lectureId") String lectureId
 			, @PathParam("noteId") String noteId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Lecture lecture = (Lecture)dynamoDB.get("Lectures", lectureId);
 		if(lecture == null)
 			return;
-		lecture.getNotes().remove(noteId);
-		dynamoDB.addOrUpdateItem(lecture);
-		dynamoDB.deleteItem("Notes", noteId);
+		lecture.getNoteSet().remove(noteId);
+		dynamoDB.save(lecture);
+		dynamoDB.delete("Notes", noteId);
 	}
 }

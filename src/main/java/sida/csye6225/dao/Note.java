@@ -4,14 +4,14 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 @DynamoDBTable(tableName = "Notes")
-public class Note extends BasicObject{
-	public String content;
+public class Note extends Item{
+	public String Text;
 
 	@DynamoDBHashKey(attributeName = "NoteId")
-	public String getId() { return this.id; }
-	public void setId(String id) { this.id = id; }
+	public String getItemId() { return this.id; }
+	public void setItemId(String id) { this.id = id; }
 	
-	@DynamoDBAttribute(attributeName = "Content")
-	public String getContent() { return this.content; } 
-	public void setContent(String content) { this.content = content; }
+	@DynamoDBAttribute(attributeName = "Text")
+	public String getText() { return this.Text; } 
+	public void setText(String text) { this.Text = text; }
 }

@@ -1,9 +1,8 @@
 package sida.csye6225.dao;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import sida.csye6225.database.DynamoDBSetCoverter;
+import sida.csye6225.database.DynamoDBCoverter;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -11,37 +10,29 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 
 @DynamoDBTable(tableName = "Programs")
-public class Program extends BasicObject{
+public class Program extends Item{
 	
 	public String programName;
-	public Set<String> courses;
-	public Set<String> students;
+	public Set<String> courseSet;
+	public Set<String> studentSet;
 	
 	@DynamoDBHashKey(attributeName = "ProgramId")
-	public String getId() { return this.id; } 
-	public void setId(String programId) { this.id = programId; } 
+	public String getItemId() { return this.id; } 
+	public void setItemId(String programId) { this.id = programId; } 
 	
 	@DynamoDBAttribute(attributeName = "ProgramName")
-	public String getProgramName() { return this.programName; }
-	public void setProgramName (String programName) { this.programName = programName; }
+	public String getName() { return this.programName; }
+	public void setName (String programName) { this.programName = programName; }
 	
-	@DynamoDBAttribute(attributeName = "Courses")
-	@DynamoDBTypeConverted(converter = DynamoDBSetCoverter.class)
-	public Set<String> getCourses() {
-		if(this.courses == null)
-			this.courses = new HashSet<>();
-		return this.courses; 
-	}
+	@DynamoDBAttribute(attributeName = "CourseSet")
+	@DynamoDBTypeConverted(converter = DynamoDBCoverter.class)
+	public Set<String> getCourseSet() { return this.courseSet; }
 	
-	public void setCourses(Set<String> courses) { this.courses = courses; } 
+	public void setCourseSet(Set<String> courseSet) { this.courseSet = courseSet; } 
 	
-	@DynamoDBAttribute(attributeName = "Students")
-	@DynamoDBTypeConverted(converter = DynamoDBSetCoverter.class)
-	public Set<String> getStudents() {
-		if(this.students == null)
-			this.students = new HashSet<>();
-		return this.students; 
-	}
+	@DynamoDBAttribute(attributeName = "StudentSet")
+	@DynamoDBTypeConverted(converter = DynamoDBCoverter.class)
+	public Set<String> getStudentSet() { return this.studentSet; }
 	
-	public void setStudents(Set<String> students) { this.students = students; } 
+	public void setStudentSet(Set<String> studentSet) { this.studentSet = studentSet; } 
 }

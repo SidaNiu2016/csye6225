@@ -20,11 +20,11 @@ public class ProfessorResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Professor createProfessor(Professor professor) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		if(dynamoDB.contains("Professors", professor.id))
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		if(dynamoDB.isContain("Professors", professor.id))
 			return null;
 		
-		dynamoDB.addOrUpdateItem(professor);
+		dynamoDB.save(professor);
 		return professor;
 	}
 	
@@ -32,8 +32,8 @@ public class ProfessorResource {
 	@Path("{professorId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Professor getProfessor(@PathParam("professorId") String professorId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		return (Professor)dynamoDB.getItem("Professors", professorId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		return (Professor)dynamoDB.get("Professors", professorId);
 	}
 	
 	@PUT
@@ -42,18 +42,18 @@ public class ProfessorResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Professor updateProfessor(Professor professor
 			, @PathParam("professorId") String professorId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		dynamoDB.addOrUpdateItem(professor);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		dynamoDB.save(professor);
 		return professor;
 	}
 	
 	@DELETE
 	@Path("{professorId}")
 	public void deleteProfessor(@PathParam("professorId") String professorId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		if(!dynamoDB.contains("Professors", professorId))
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		if(!dynamoDB.isContain("Professors", professorId))
 			return;
-		dynamoDB.deleteItem("Professors", professorId);
+		dynamoDB.delete("Professors", professorId);
 	}
 	
 }

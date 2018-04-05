@@ -1,9 +1,8 @@
 package sida.csye6225.dao;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import sida.csye6225.database.DynamoDBSetCoverter;
+import sida.csye6225.database.DynamoDBCoverter;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
@@ -11,25 +10,16 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 
 @DynamoDBTable(tableName = "Lectures")
-public class Lecture extends BasicObject{
-	public String topic;
-	public Set<String> notes;
+public class Lecture extends Item{
+	public Set<String> noteSet;
 	
 	@DynamoDBHashKey(attributeName = "LectureId")
-	public String getId() { return this.id; }
-	public void setId(String id) { this.id = id; }
-	
-	@DynamoDBAttribute(attributeName = "Topic")
-	public String getTopic() { return this.topic; }
-	public void setTopic(String topic) { this.topic = topic; }
+	public String getItemId() { return this.id; }
+	public void setItemId(String id) { this.id = id; }
 	
 	@DynamoDBAttribute(attributeName = "Notes")
-	@DynamoDBTypeConverted(converter = DynamoDBSetCoverter.class)
-	public Set<String> getNotes() { 
-		if(this.notes == null)
-			this.notes = new HashSet<>();
-		return this.notes;
-	} 
+	@DynamoDBTypeConverted(converter = DynamoDBCoverter.class)
+	public Set<String> getNoteSet() { return this.noteSet; } 
 	
-	public void setNotes(Set<String> notes) { this.notes = notes; }
+	public void setNoteSet(Set<String> noteSet) { this.noteSet = noteSet; }
 }

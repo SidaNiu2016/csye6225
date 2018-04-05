@@ -22,23 +22,23 @@ public class StudentResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<String> getStudentsInProgram(@PathParam("programId") String programId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Program program = (Program)dynamoDB.getItem("Programs", programId);
-		return program.getStudents();
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Program program = (Program)dynamoDB.get("Programs", programId);
+		return program.getStudentSet();
 	}
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Student createStudent(@PathParam("programId") String programId, Student student) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Program program = (Program)dynamoDB.getItem("Programs", programId);
-		if(dynamoDB.contains("Students", student.id) || program == null)
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Program program = (Program)dynamoDB.get("Programs", programId);
+		if(dynamoDB.isContain("Students", student.id) || program == null)
 			return null;
 		
-		program.getStudents().add(student.id);
-		dynamoDB.addOrUpdateItem(program);
-		dynamoDB.addOrUpdateItem(student);
+		program.getStudentSet().add(student.id);
+		dynamoDB.save(program);
+		dynamoDB.save(student);
 		return student;
 	}
 	
@@ -46,8 +46,8 @@ public class StudentResource {
 	@Path("{studentId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Student getStudent(@PathParam("studentId") String studentId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		return (Student)dynamoDB.getItem("Students", studentId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		return (Student)dynamoDB.get("Students", studentId);
 	}
 	
 	@PUT
@@ -56,14 +56,14 @@ public class StudentResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Student updateStudent(Student student, @PathParam("studentId") String studentId
 			, @PathParam("programId") String programId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Program program = (Program)dynamoDB.getItem("Programs", programId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Program program = (Program)dynamoDB.get("Programs", programId);
 		if(program == null)
 			return null;
 		
-		program.getStudents().add(studentId);
-		dynamoDB.addOrUpdateItem(program);
-		dynamoDB.addOrUpdateItem(student);
+		program.getStudentSet().add(studentId);
+		dynamoDB.save(program);
+		dynamoDB.save(student);
 		return student;
 	}
 	
@@ -71,13 +71,13 @@ public class StudentResource {
 	@Path("{studentId}")
 	public void deleteStudent(@PathParam("programId") String programId
 			, @PathParam("studentId") String studentId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		Program program = (Program)dynamoDB.getItem("Programs", programId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Program program = (Program)dynamoDB.get("Programs", programId);
 		if(program == null)
 			return;
 		
-		program.getStudents().remove(studentId);
-		dynamoDB.addOrUpdateItem(program);
-		dynamoDB.deleteItem("Students", studentId);
+		program.getStudentSet().remove(studentId);
+		dynamoDB.save(program);
+		dynamoDB.delete("Students", studentId);
 	}
 }

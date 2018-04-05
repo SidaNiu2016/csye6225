@@ -12,7 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import sida.csye6225.dao.BasicObject;
+import sida.csye6225.dao.Item;
 import sida.csye6225.dao.Program;
 import sida.csye6225.database.DynamoDB;
 
@@ -22,18 +22,18 @@ public class ProgramResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<String> getProgramList() {
-		return DynamoDB.getInstance().getAllItems("Programs");
+		return DynamoDB.getDB().getAll("Programs");
 	}
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Program createProgram(Program program) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		if(dynamoDB.contains("Programs", program.id))
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		if(dynamoDB.isContain("Programs", program.id))
 			return null;
 		
-		dynamoDB.addOrUpdateItem(program);
+		dynamoDB.save(program);
 		return program;
 	}
 	
@@ -41,8 +41,8 @@ public class ProgramResource {
 	@Path("{programId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Program getProgram(@PathParam("programId") String programId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		BasicObject object = dynamoDB.getItem("Programs", programId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		Item object = dynamoDB.get("Programs", programId);
 		return (Program)object;
 	}
 	
@@ -52,15 +52,15 @@ public class ProgramResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Program updateProgram(@PathParam("programId") String programId
 			, Program program) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		dynamoDB.addOrUpdateItem(program);	
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		dynamoDB.save(program);	
 		return program;
 	}
 	
 	@DELETE
 	@Path("{programId}")
 	public void deleteProgram(@PathParam("programId") String programId) {
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		dynamoDB.deleteItem("Programs", programId);
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		dynamoDB.delete("Programs", programId);
 	}
 }

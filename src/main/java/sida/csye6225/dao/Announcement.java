@@ -5,20 +5,20 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "Announcements")
-public class Announcement extends BasicObject{
+public class Announcement extends Item{
 	
 	public String courseId;
-	public String text;
+	public String message;
 	
 	@DynamoDBHashKey(attributeName = "AnnouncementId")
-	public String getId() { return this.id; }
-	public void setId(String id) { this.id = id;}
+	public String getItemId() { return this.id; }
+	public void setItemId(String id) { this.id = id;}
 	
 	@DynamoDBAttribute(attributeName = "CourseId")
 	public String getCourseId() { return this.courseId; }
 	public void setCourseId(String courseId) { this.courseId = courseId; }
 	
-	@DynamoDBAttribute(attributeName = "Text")
-	public String getText() { return this.text; }
-	public void setText(String text) { this.text = text; }
+	@DynamoDBAttribute(attributeName = "Message")
+	public String getMessage() { return this.message; }
+	public void setMessage(String message) { this.message = message; }
 }

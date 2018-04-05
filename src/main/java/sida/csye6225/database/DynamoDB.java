@@ -22,7 +22,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 
 import sida.csye6225.dao.Announcement;
-import sida.csye6225.dao.BasicObject;
+import sida.csye6225.dao.Item;
 import sida.csye6225.dao.Course;
 import sida.csye6225.dao.Lecture;
 import sida.csye6225.dao.Note;
@@ -31,43 +31,31 @@ import sida.csye6225.dao.Program;
 import sida.csye6225.dao.Student;
 
 public class DynamoDB {
-	static AmazonDynamoDB dynamoDb;
+	static AmazonDynamoDB dynamoDBClient;
 	static DynamoDBMapper mapper;
-	// singleton instance
-	static DynamoDB instance = null;
-	private static Map<String, Class> classMap = new HashMap<>();
+	static DynamoDB instance;
+    private static Map<String, Class> classMap = new HashMap<>();
 	
 	public DynamoDB() {
-		try {
 			ProfileCredentialsProvider credentialsProvider = 
-					new ProfileCredentialsProvider();
+					new ProfileCredentialsProvider("default");
 		
 		    credentialsProvider.getCredentials();
-		    dynamoDb = AmazonDynamoDBClientBuilder
+		    dynamoDBClient = AmazonDynamoDBClientBuilder
 					.standard()
 					.withCredentials(credentialsProvider)
 					.withRegion("us-west-2")
 					.build();
 			
-			mapper = new DynamoDBMapper(dynamoDb);
-			classMap.put("Programs", Program.class);
-			classMap.put("Courses", Course.class);
-			classMap.put("Students", Student.class);
-			classMap.put("Notes", Note.class);
-			classMap.put("Lectures", Lecture.class);
+			mapper = new DynamoDBMapper(dynamoDBClient);
 			classMap.put("Announcements", Announcement.class);
+			classMap.put("Courses", Course.class);
+			classMap.put("Lectures", Lecture.class);
+			classMap.put("Notes", Note.class);
 			classMap.put("Professors", Professor.class);
-		}
-		catch (Exception e) {
-			System.out.println(e.toString());
-		}
+			classMap.put("Programs", Program.class);
+			classMap.put("Students", Student.class);
 	}
-	
-	public static DynamoDB getInstance() {
-		if(instance == null)
-			instance = new DynamoDB();
-		return instance;
-	} 
 	
 	public void createTable(String tableName, String key) throws Exception {
 		List<KeySchemaElement> keySchema = new ArrayList<>();
@@ -88,46 +76,52 @@ public class DynamoDB {
 						.withReadCapacityUnits(3L)
 						.withWriteCapacityUnits(3L));
 		
-		TableUtils.createTableIfNotExists(dynamoDb, createTableRequest);
-		TableUtils.waitUntilActive(dynamoDb, tableName);
+		TableUtils.createTableIfNotExists(dynamoDBClient, createTableRequest);
+		TableUtils.waitUntilActive(dynamoDBClient, tableName);
 	}
 	
-	public void addOrUpdateItem(BasicObject obj) {
-		mapper.save(obj);
+	public void save(Item item) {
+		mapper.save(item);
 	}
 	
-	public BasicObject getItem(String tableName, String key) {
-		BasicObject object = mapper.load(classMap.get(tableName), key);
-		return object;
+	public Item get(String tableName, String key) {
+		Item item = mapper.load(classMap.get(tableName), key);
+		return item;
 	}
 	
-	public Set<String> getAllItems(String tableName) {
-		List<BasicObject> objs = mapper.scan(classMap.get(tableName)
+	public Set<String> getAll(String tableName) {
+		List<Item> items = mapper.scan(classMap.get(tableName)
 				, new DynamoDBScanExpression());
 		Set<String> result = new HashSet<>();
-		for(BasicObject object : objs)
-			result.add(object.id);
+		for(Item item : items)
+			result.add(item.id);
 		return result;
 	}
 	
-	public void deleteItem(String tableName, String key) {
-		BasicObject object = mapper.load(classMap.get(tableName), key);
-		mapper.delete(object, new DynamoDBDeleteExpression());
+	public void delete(String tableName, String key) {
+		Item item = mapper.load(classMap.get(tableName), key);
+		mapper.delete(item, new DynamoDBDeleteExpression());
 	}
 	
-	public boolean contains(String tableName, String key) {
-		BasicObject object = mapper.load(classMap.get(tableName), key);
-		return object != null;
+	public boolean isContain(String tableName, String key) {
+		Item item = mapper.load(classMap.get(tableName), key);
+		return item != null;
 	}
+	
+	public static DynamoDB getDB() {
+		if(instance == null)
+			instance = new DynamoDB();
+		return instance;
+	} 
 	
 	public static void main(String[] args) throws Exception{
-		DynamoDB dynamoDB = DynamoDB.getInstance();
-		dynamoDB.createTable("Programs", "ProgramId");
+		DynamoDB dynamoDB = DynamoDB.getDB();
+		dynamoDB.createTable("Announcements", "AnnouncementId");
 		dynamoDB.createTable("Courses", "CourseId");
-		dynamoDB.createTable("Students", "StudentId");
 		dynamoDB.createTable("Lectures", "LectureId");
 		dynamoDB.createTable("Notes", "NoteId");
-		dynamoDB.createTable("Announcements", "AnnouncementId");
 		dynamoDB.createTable("Professors", "ProfessorId");
+		dynamoDB.createTable("Programs", "ProgramId");
+		dynamoDB.createTable("Students", "StudentId");
 	}
 }
